@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: webRTC_demo
+
+server:
+  port: 9090
