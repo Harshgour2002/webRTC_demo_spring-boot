@@ -1,4 +1,4 @@
-package com.example.webRTC_demo.webRTC_demo;
+package com.example.webRTC_demo.webRTC_demo.webRTC;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
