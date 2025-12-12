@@ -34,12 +34,16 @@ public class SignalingHandler extends TextWebSocketHandler {
    @Override
    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
       JsonNode json = OBJECT_MAPPER.readTree(message.getPayload());
+      String senderId = session.getId();
 
       if (json.has("to")) {
          String to = json.path("to").asText();
          WebSocketSession dest = clients.get(to);
          if (dest != null && dest.isOpen()) {
-            dest.sendMessage(new TextMessage(message.getPayload()));
+            // Add sender ID to the message
+            ObjectNode msgWithSender = OBJECT_MAPPER.createObjectNode();
+            ((ObjectNode) json).put("from", senderId);
+            dest.sendMessage(new TextMessage(json.toString()));
          } else {
             ObjectNode err = OBJECT_MAPPER.createObjectNode();
             err.put("type", "error");
@@ -50,7 +54,9 @@ public class SignalingHandler extends TextWebSocketHandler {
          // broadcast to all other connected clients
          for (Map.Entry<String, WebSocketSession> entry : clients.entrySet()) {
             if (!entry.getKey().equals(session.getId()) && entry.getValue().isOpen()) {
-               entry.getValue().sendMessage(new TextMessage(message.getPayload()));
+               // Add sender ID to the message
+               ((ObjectNode) json).put("from", senderId);
+               entry.getValue().sendMessage(new TextMessage(json.toString()));
             }
          }
       }
